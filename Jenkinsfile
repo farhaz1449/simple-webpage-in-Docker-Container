@@ -27,7 +27,6 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // docker.build("${IMAGE_NAME}:latest")  // Requires Docker Pipeline Plugin
                     sh 'docker build -t ${IMAGE_NAME}:latest .'
                 }
             }
@@ -37,7 +36,6 @@ pipeline {
             steps {
                 script {
                     sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                    // docker.push("${IMAGE_NAME}:latest")
                     sh 'docker push ${IMAGE_NAME}:latest'
                 }
             }

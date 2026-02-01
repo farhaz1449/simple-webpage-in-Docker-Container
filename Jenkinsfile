@@ -14,6 +14,7 @@ pipeline {
         PORT = "22"
         SERVER_IP = "54.226.161.122"
         APP_NAME = "nginx-web"
+        VERSION = ${BUILD_NUMBER}
     }
 
     stages {
@@ -27,7 +28,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t ${IMAGE_NAME}:latest .'
+                    sh 'docker build -t ${IMAGE_NAME}:${VERSION} .'
                 }
             }
         }
@@ -36,7 +37,7 @@ pipeline {
             steps {
                 script {
                     sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                    sh 'docker push ${IMAGE_NAME}:latest'
+                    sh 'docker push ${IMAGE_NAME}:${VERSION}'
                 }
             }
         }
@@ -46,9 +47,9 @@ pipeline {
                 sshagent(credentials: ['deploy-server-ssh']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no $USER@$SERVER_IP \
-                        "docker pull $IMAGE_NAME:latest && \
+                        "docker pull $IMAGE_NAME:${VERSION} && \
                          docker rm -f $APP_NAME || true && \
-                         docker run -d --name $APP_NAME -p 80:80 $IMAGE_NAME:latest"
+                         docker run -d --name $APP_NAME -p 80:80 $IMAGE_NAME:${VERSION}"
                     '''
                 }
             }

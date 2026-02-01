@@ -14,7 +14,7 @@ pipeline {
         PORT = "22"
         SERVER_IP = "54.226.161.122"
         APP_NAME = "nginx-web"
-        VERSION = ${BUILD_NUMBER}
+        VERSION = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -28,7 +28,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t ${IMAGE_NAME}:${VERSION} .'
+                    sh "docker build -t ${IMAGE_NAME}:${VERSION} ."
                 }
             }
         }
@@ -37,7 +37,7 @@ pipeline {
             steps {
                 script {
                     sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                    sh 'docker push ${IMAGE_NAME}:${VERSION}'
+                    sh "docker push ${IMAGE_NAME}:${VERSION}"
                 }
             }
         }
@@ -53,6 +53,18 @@ pipeline {
                     '''
                 }
             }
+        }
+    }
+    
+    post {
+        always {
+            echo "Pipeline completed. Build #${BUILD_NUMBER}"
+        }
+        failure {
+            echo 'Deployment failed - check logs above.'
+        }
+        success {
+            echo "Deployment successful! Check http://${SERVER_IP}"
         }
     }
 }
